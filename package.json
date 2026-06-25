@@ -1,0 +1,16 @@
+{
+  "name": "mantenimiento-coma-sa-v13-rebuild",
+  "version": "13.0.0-beta",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.48.1"
+  },
+  "devDependencies": {
+    "vercel": "^39.0.0"
+  }
+}

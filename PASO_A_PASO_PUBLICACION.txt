@@ -1,0 +1,50 @@
+PASO A PASO - PUBLICACIÓN V13
+
+PASO 1 - SUPABASE
+1. Entrá a Supabase.
+2. Abrí SQL Editor.
+3. Pegá todo el contenido de:
+   sql/01_supabase_v13_rebuild.sql
+4. Ejecutá RUN.
+5. Revisá que existan:
+   equipos
+   novedades
+   ordenes_trabajo
+   cierres_ot
+   horometros
+   archivos_fotos
+   auditoria_cambios
+   usuarios_app
+   vw_gantt_operativo
+   vw_dashboard_general
+
+PASO 2 - GITHUB
+1. Crear repo nuevo:
+   mantenimiento-coma-sa-beta
+2. Subir todos los archivos de este paquete.
+
+PASO 3 - VERCEL
+1. New Project.
+2. Importar repo mantenimiento-coma-sa-beta.
+3. Framework: Other / Static.
+4. Deploy.
+
+PASO 4 - VARIABLES VERCEL
+Cargar:
+NEXT_PUBLIC_SUPABASE_URL = https://wosowyoyohzcwoltsisqt.supabase.co
+SUPABASE_SECRET_KEY = tu secret key de Supabase
+APP_PASSWORD = coma2026
+
+PASO 5 - TEST
+Abrir:
+https://tu-url.vercel.app/api/diag
+
+Si devuelve ok true, backend conectado.
+
+PASO 6 - SIGUIENTE
+Conectar botones del index:
+novedad -> /api/novedades
+crear OT -> /api/ot-directa
+asignar -> /api/ot-asignar
+cerrar -> /api/ot-cerrar
+reporte lunes -> /api/horometros
