@@ -27,3 +27,4 @@ Incluye backend para Vercel + Supabase:
 7. Luego conectar botones del index a estos endpoints.
 
 No pegar claves secretas en chat.
+Deploy final V13
