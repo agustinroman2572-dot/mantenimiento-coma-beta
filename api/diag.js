@@ -18,7 +18,7 @@ export default async function handler(req, res) {
     }
 
     const supabase = getSupabaseAdmin();
-    const { data, error } = await supabase.from('equipos').select('id, interno, equipo').limit(3);
+    const { data, error } = await supabase.from('equipos').select('id, interno, descripcion, marca, modelo').limit(3);
     if (error) throw error;
 
     return sendOk(res, {
