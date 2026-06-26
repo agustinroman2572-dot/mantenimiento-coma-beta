@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
   const url =
-    process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    process.env.SUPABASE_URL ||
+   3  process.env.SUPABASE_URL ||
+4  process.env.NEXT_PUBLIC_SUPABASE_URL ||
     null;
 
   const secret =
