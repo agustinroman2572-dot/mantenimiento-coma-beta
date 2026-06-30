@@ -961,7 +961,43 @@ function logout() {
   qs("#welcome").classList.remove("hidden");
   document.body.classList.remove("device-mode-phone");
 }
-async function bootApp() {
+
+async function cargarDatosBackend() {
+  try {
+    const res = await fetch("/api/bootstrap");
+    const json = await res.json();
+
+    if (!json || !json.ok) {
+      console.warn("Bootstrap no disponible", json);
+      return;
+    }
+
+    if (Array.isArray(json.equipos)) {
+      DATA.equipos = json.equipos;
+    }
+
+    if (Array.isArray(json.novedades)) {
+      DATA.novedades = json.novedades;
+    }
+
+    if (Array.isArray(json.ot_pendientes)) {
+      DATA.otPendientes = json.ot_pendientes;
+    }
+
+    if (Array.isArray(json.gantt)) {
+      DATA.gantt = json.gantt;
+    }
+
+    DATA.dashboard = json.dashboard || DATA.dashboard || {};
+
+    normalizeLoadedRecords();
+    console.log("Datos reales cargados desde Supabase", json);
+  } catch (err) {
+    console.warn("No se pudo cargar /api/bootstrap", err);
+  }
+}
+
+function bootApp() {
   if(!state.user) return;
   qs("#welcome").classList.add("hidden");
   qs("#app").classList.remove("hidden");
@@ -970,10 +1006,14 @@ async function bootApp() {
   qs("#userLabel").textContent = `${state.user.nombre} · ${state.user.rol}`;
   qs("#modeText").textContent = state.device==="phone" ? "Vista teléfono" : "Vista PC";
   qs("#permissionBox").innerHTML = `<strong>${state.user.rol}</strong><br>${state.user.permiso}`;
-  await cargarDatosBackend();
+
   buildMenu();
   const first = getMenuItems()[0]?.id || "dashboard";
   navigate(first);
+
+  cargarDatosBackend().then(() => {
+    navigate(state.active || first);
+  });
 }
 
 
