@@ -961,7 +961,7 @@ function logout() {
   qs("#welcome").classList.remove("hidden");
   document.body.classList.remove("device-mode-phone");
 }
-function bootApp() {
+async function bootApp() {
   if(!state.user) return;
   qs("#welcome").classList.add("hidden");
   qs("#app").classList.remove("hidden");
@@ -970,6 +970,7 @@ function bootApp() {
   qs("#userLabel").textContent = `${state.user.nombre} · ${state.user.rol}`;
   qs("#modeText").textContent = state.device==="phone" ? "Vista teléfono" : "Vista PC";
   qs("#permissionBox").innerHTML = `<strong>${state.user.rol}</strong><br>${state.user.permiso}`;
+  await cargarDatosBackend();
   buildMenu();
   const first = getMenuItems()[0]?.id || "dashboard";
   navigate(first);
