@@ -973,8 +973,17 @@ async function cargarDatosBackend() {
     }
 
     if (Array.isArray(json.equipos)) {
-      DATA.equipos = json.equipos;
-    }
+  DATA.equipos = json.equipos.map(e => ({
+    ...e,
+    grupo: e.grupo || "",
+    ubicacion: e.ubicacion || e.obra || "",
+    horometro: e.horometro || e.horometro_actual || "",
+    serviceProximo: e.serviceProximo || e.proximo_service || "",
+    fechaEstimadaService: e.fechaEstimadaService || e.fecha_tentativa_service || e.fecha_inicio_gantt || "",
+    hsFaltantes: e.hsFaltantes ?? e.horas_faltantes ?? "",
+    serviceEstado: e.serviceEstado || e.estado_service || e.estado || "Sin información"
+  }));
+}
 
     if (Array.isArray(json.novedades)) {
       DATA.novedades = json.novedades;
