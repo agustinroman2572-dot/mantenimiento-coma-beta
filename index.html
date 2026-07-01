@@ -971,24 +971,18 @@ async function cargarDatosBackend() {
       console.warn("Bootstrap no disponible", json);
       return;
     }
-if (Array.isArray(json.equipos)) {
-  DATA.equipos = json.equipos.map(e => {
-    const service = (json.gantt || []).find(g =>
-      g.tipo_registro === "SERVICE" && g.equipo_id === e.id
-    ) || {};
 
-    return {
-      ...e,
-      grupo: e.grupo || "",
-      ubicacion: e.ubicacion || e.obra || "",
-      horometro: e.horometro || e.horometro_actual || "",
-      serviceProximo: e.serviceProximo || e.proximo_service || service.proximo_service || "",
-      fechaEstimadaService: e.fechaEstimadaService || e.fecha_tentativa_service || service.fecha_inicio_gantt || service.fecha_fin_gantt || "",
-      hsFaltantes: e.hsFaltantes ?? e.horas_faltantes ?? service.horas_faltantes ?? "",
-      serviceEstado: e.serviceEstado || e.estado_service || service.estado || "Sin información"
-    };
-  });
-}
+    if (Array.isArray(json.equipos)) {
+  DATA.equipos = json.equipos.map(e => ({
+    ...e,
+    grupo: e.grupo || "",
+    ubicacion: e.ubicacion || e.obra || "",
+    horometro: e.horometro || e.horometro_actual || "",
+    serviceProximo: e.serviceProximo || e.proximo_service || "",
+    fechaEstimadaService: e.fechaEstimadaService || e.fecha_tentativa_service || e.fecha_inicio_gantt || "",
+    hsFaltantes: e.hsFaltantes ?? e.horas_faltantes ?? "",
+    serviceEstado: e.serviceEstado || e.estado_service || e.estado || "Sin información"
+  }));
 }
 
     if (Array.isArray(json.novedades)) {
@@ -1278,32 +1272,30 @@ function buildGanttRows() {
         fechaProgramar:inicioBase
       };
     });
- const services = (Array.isArray(DATA.gantt) ? DATA.gantt : [])
-  .filter(g => up(g.tipo_registro || g.tipo) === "SERVICE")
-  .map(g => {
-    const estado = up(g.estado || (Number(g.horas_faltantes) <= 0 ? "VENCIDO" : "PROGRAMAR"));
-    const fechaTentativa = g.fecha_fin_gantt || g.fecha_inicio_gantt || "";
-    const fechaProgramar = g.fecha_inicio_gantt || fechaTentativa;
-    const inicio = fechaProgramar;
-    const fin = fechaTentativa;
-
-    return {
-      tipo:"SERVICE",
-      id:g.referencia || `SERVICE ${g.proximo_service || ""}`.trim(),
-      interno:g.interno || "",
-      equipo:g.equipo || "",
-      modelo:g.modelo || "",
-      obra:g.obra || "",
-      estado,
-      criticidad:estado === "VENCIDO" ? "ALTA" : "MEDIA",
-      asignado:"PROGRAMAR",
-      inicio,
-      fin,
-      fechaTentativa,
-      fechaProgramar,
-      descripcion:g.descripcion || `PRÓXIMO SERVICE ${g.proximo_service || "S/D"} · FALTAN ${g.horas_faltantes ?? "S/D"} HS`
-    };
-  });
+  const services = DATA.equipos
+    .filter(e => ["PROGRAMAR","VENCIDO"].includes(up(e.serviceEstado)))
+    .map(e => {
+      const estado = up(e.serviceEstado) === "VENCIDO" ? "VENCIDO" : "PROGRAMAR";
+      const fechaTentativa = e.fechaEstimadaService || serviceDueDate(e.hsFaltantes);
+      const fechaProgramar = programarDesdeDate(fechaTentativa);
+      const inicio = fechaProgramar;
+      const fin = fechaTentativa;
+      return {
+        tipo:"SERVICE",
+        id:`SERVICE ${e.serviceProximo || ""}`.trim(),
+        interno:e.interno,
+        equipo:`${e.marca || ""} ${e.modelo || ""}`.trim(),
+        modelo:e.modelo || e.tipo || "",
+        obra:e.ubicacion,
+        estado,
+        criticidad:estado === "VENCIDO" ? "ALTA" : "MEDIA",
+        asignado:"PROGRAMAR",
+        inicio,
+        fin,
+        fechaTentativa,
+        fechaProgramar,
+        descripcion:`PRÓXIMO SERVICE ${e.serviceProximo || "S/D"} · FALTAN ${e.hsFaltantes || 0} HS · PROGRAMAR DESDE ${fechaProgramar} · FECHA TENTATIVA ${fechaTentativa}`
+      };
     });
   return [...ot, ...services].sort((a,b)=>String(a.inicio).localeCompare(String(b.inicio)) || String(a.interno).localeCompare(String(b.interno),undefined,{numeric:true}));
 }
