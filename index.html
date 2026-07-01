@@ -1314,7 +1314,20 @@ function gantt() {
   const minDate = allDates[0] || todayISO();
   const start = addDaysISO(minDate, -2);
 
-  const days = Array.from({length:42},(_,i)=>addDaysISO(start,i));
+const days = (() => {
+  const hoy = new Date(todayISO() + "T00:00:00");
+  const desde = new Date(hoy);
+  desde.setMonth(desde.getMonth() - 6);
+
+  const hasta = new Date(hoy);
+  hasta.setMonth(hasta.getMonth() + 6);
+
+  const arr = [];
+  for (let d = new Date(desde); d <= hasta; d.setDate(d.getDate() + 1)) {
+    arr.push(d.toISOString().slice(0, 10));
+  }
+  return arr;
+})();
   const totalDays = days.length;
   const weekNames = ["SEMANA 1","SEMANA 2","SEMANA 3","SEMANA 4","SEMANA 5","SEMANA 6"];
   const dayLetters = ["L","M","M","J","V","S","D"];
