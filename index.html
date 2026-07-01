@@ -1752,11 +1752,65 @@ function reporteSemanal() {
       `<button class="btn btn-green" onclick="agregarFilaHorometro()">Agregar equipo</button>`)}
     <div class="panel" style="border-color:#bee8cf;background:#f6fffa"><div class="panel-title"><h3>🔔 Notificación de lunes</h3><span>Recordatorio automático previsto</span></div><p class="muted">En la versión real, el sistema enviará una notificación todos los lunes al jefe de obra / operador para cargar horómetros de todos los equipos activos.</p></div>
     <div class="panel"><div class="uppercase-rule">Regla de carga: nombre, interno, observaciones y motivo se escriben en MAYÚSCULA automáticamente.</div><form id="weeklyForm" class="login-form"><label>Nombre y apellido de quien carga el reporte<input name="responsable" placeholder="Ej: Juan Pérez" required></label><label>Motivo si se carga fuera del lunes<input name="motivo" placeholder="Ej: lluvia, sin conectividad, equipo sin operación"></label><div class="table-wrap"><table><thead><tr><th>Interno</th><th>Horómetro</th><th>Obra / ubicación</th><th>Observación</th></tr></thead><tbody id="weeklyRows"></tbody></table></div><button class="btn btn-green" type="submit">Guardar reporte semanal</button></form></div>`;
-  qs("#weeklyForm").addEventListener("submit", ev=>{
-    ev.preventDefault();
-    qs("#screen").innerHTML = `<div class="success-screen"><span class="big">✅</span><h2>OK, muchas gracias</h2><p>Gracias por compartir esta información importante. El reporte de horómetros quedó cargado correctamente en la maqueta.</p><br><button class="btn btn-green" onclick="navigate('${state.user.panel==="obra" ? "misNovedades" : "dashboard"}')">Volver al inicio</button></div>`;
-    setTimeout(()=>navigate(state.user.panel==="obra" ? "misNovedades" : "dashboard"), 1800);
-  });
+  qs("#weeklyForm").addEventListener("submit", async ev => {
+  ev.preventDefault();
+
+  const responsable = qs("#weeklyForm input")?.value || "REPORTE WEB";
+  const rows = Array.from(qsa("#weeklyRows tr"));
+
+  const registros = rows.map(tr => {
+    const inputs = tr.querySelectorAll("input");
+    const select = tr.querySelector("select");
+
+    return {
+      interno: inputs[0]?.value || "",
+      horometro: inputs[1]?.value || "",
+      obra: select?.value || "",
+      observacion: inputs[2]?.value || ""
+    };
+  }).filter(r => r.interno && r.horometro);
+
+  if (!registros.length) {
+    alert("Cargá al menos un interno y un horómetro válido.");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/horometros", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        responsable,
+        origen: "REPORTE WEB",
+        registros
+      })
+    });
+
+    const json = await res.json();
+
+    if (!json.ok) {
+      alert("No se pudo guardar el reporte: " + (json.error || "Error desconocido"));
+      return;
+    }
+
+    await cargarDatosBackend();
+
+    qs("#screen").innerHTML = `
+      <div class="success-screen">
+        <span class="big">✅</span>
+        <h2>Reporte guardado</h2>
+        <p>El horómetro fue guardado correctamente en Supabase.</p>
+      </div>
+    `;
+
+    setTimeout(() => navigate("equipos"), 1200);
+
+  } catch (err) {
+    alert("Error al guardar horómetro: " + err.message);
+  }
+});
   agregarFilaHorometro();
 }
 function agregarFilaHorometro() {
