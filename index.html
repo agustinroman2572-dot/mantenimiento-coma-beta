@@ -1316,14 +1316,11 @@ function gantt() {
 
 const days = (() => {
   const hoy = new Date(todayISO() + "T00:00:00");
-  const desde = new Date(hoy);
-  desde.setMonth(desde.getMonth() - 6);
-
   const hasta = new Date(hoy);
   hasta.setMonth(hasta.getMonth() + 6);
 
   const arr = [];
-  for (let d = new Date(desde); d <= hasta; d.setDate(d.getDate() + 1)) {
+  for (let d = new Date(hoy); d <= hasta; d.setDate(d.getDate() + 1)) {
     arr.push(d.toISOString().slice(0, 10));
   }
   return arr;
