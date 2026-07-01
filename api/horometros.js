@@ -1,9 +1,101 @@
 import { getSupabaseAdmin, sendOk, sendError, normalizeBody } from '../lib/supabaseAdmin.js';
 
-function proximoService250(h) {
-  const n = Number(h || 0);
-  if (!Number.isFinite(n)) return null;
-  return Math.ceil((n + 0.0001) / 250) * 250;
+function toNumber(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function clean(value) {
+  if (value === undefined || value === null) return '';
+  return String(value).trim();
+}
+
+async function buscarEquipoPorInterno(supabase, interno) {
+  const { data, error } = await supabase
+    .from('equipos')
+    .select('id, interno, descripcion, marca, modelo, estado, obra_id, horometro_actual, ultimo_service_horometro, service_intervalo_horas')
+    .eq('interno', String(interno))
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+async function guardarUnHorometro(supabase, body) {
+  const b = normalizeBody(body || {});
+
+  const interno = clean(b.interno);
+  const horometro = toNumber(b.horometro_actual ?? b.horometro ?? b.horas);
+
+  if (!interno || horometro === null) {
+    throw new Error('Falta interno u horómetro válido.');
+  }
+
+  const equipo = await buscarEquipoPorInterno(supabase, interno);
+
+  if (!equipo) {
+    throw new Error(`No se encontró equipo con interno ${interno}.`);
+  }
+
+  const fechaReporte =
+    clean(b.fecha_reporte) ||
+    clean(b.fecha) ||
+    new Date().toISOString().slice(0, 10);
+
+  const responsable =
+    clean(b.responsable) ||
+    clean(b.nombre) ||
+    clean(b.reporta) ||
+    'REPORTE WEB';
+
+  const observacion =
+    clean(b.observacion) ||
+    clean(b.obs) ||
+    clean(b.comentario) ||
+    null;
+
+  const origen =
+    clean(b.origen) ||
+    'REPORTE WEB';
+
+  const payloadHorometro = {
+    equipo_id: equipo.id,
+    fecha_reporte: fechaReporte,
+    horometro,
+    obra_id: equipo.obra_id || null,
+    responsable,
+    origen,
+    observacion
+  };
+
+  const { data: horometroInsertado, error: insertError } = await supabase
+    .from('horometros')
+    .insert(payloadHorometro)
+    .select('*')
+    .single();
+
+  if (insertError) throw insertError;
+
+  const updateEquipo = {
+    horometro_actual: horometro
+  };
+
+  if (b.estado_equipo || b.estado) {
+    updateEquipo.estado = clean(b.estado_equipo || b.estado);
+  }
+
+  const { error: updateError } = await supabase
+    .from('equipos')
+    .update(updateEquipo)
+    .eq('id', equipo.id);
+
+  if (updateError) throw updateError;
+
+  return {
+    interno,
+    equipo_id: equipo.id,
+    horometro: horometroInsertado
+  };
 }
 
 export default async function handler(req, res) {
@@ -11,37 +103,72 @@ export default async function handler(req, res) {
     const supabase = getSupabaseAdmin();
 
     if (req.method === 'GET') {
-      const { data, error } = await supabase.from('horometros').select('*').order('fecha_reporte', { ascending:false });
+      const { data, error } = await supabase
+        .from('horometros')
+        .select(`
+          id,
+          equipo_id,
+          fecha_reporte,
+          horometro,
+          obra_id,
+          responsable,
+          origen,
+          observacion,
+          created_at,
+          equipos (
+            interno,
+            descripcion,
+            marca,
+            modelo
+          )
+        `)
+        .order('created_at', { ascending: false });
+
       if (error) throw error;
+
       return sendOk(res, { horometros: data || [] });
     }
 
     if (req.method === 'POST') {
-      const b = normalizeBody(req.body || {});
-      const h = Number(b.horometro_actual || b.horometro);
-      if (!b.interno || !Number.isFinite(h)) return sendError(res, 'Falta interno u horómetro válido.', 400);
+      const body = req.body || {};
 
-      const prox = proximoService250(h);
-      const payload = {
-        interno: b.interno,
-        equipo: b.equipo || null,
-        obra: b.obra || null,
-        horometro_actual: h,
-        fecha_reporte: b.fecha_reporte || new Date().toISOString().slice(0, 10),
-        estado_equipo: b.estado_equipo || 'OPERATIVO',
-        observacion: b.observacion || null,
-        proximo_service: prox,
-        horas_faltantes: prox - h
-      };
+      const registros =
+        Array.isArray(body.registros) ? body.registros :
+        Array.isArray(body.equipos) ? body.equipos :
+        Array.isArray(body.horometros) ? body.horometros :
+        null;
 
-      const { data, error } = await supabase.from('horometros').insert(payload).select('*').single();
-      if (error) throw error;
+      if (registros) {
+        const guardados = [];
 
-      await supabase.from('equipos')
-        .update({ horometro_actual: h, obra_actual: payload.obra, estado: payload.estado_equipo })
-        .eq('interno', payload.interno);
+        for (const item of registros) {
+          const base = {
+            responsable: body.responsable || body.nombre || body.reporta,
+            fecha_reporte: body.fecha_reporte || body.fecha,
+            origen: body.origen || 'REPORTE WEB'
+          };
 
-      return sendOk(res, { horometro: data });
+          const resultado = await guardarUnHorometro(supabase, {
+            ...base,
+            ...item
+          });
+
+          guardados.push(resultado);
+        }
+
+        return sendOk(res, {
+          mensaje: 'Reporte semanal guardado correctamente.',
+          cantidad: guardados.length,
+          guardados
+        });
+      }
+
+      const resultado = await guardarUnHorometro(supabase, body);
+
+      return sendOk(res, {
+        mensaje: 'Horómetro guardado correctamente.',
+        ...resultado
+      });
     }
 
     return sendError(res, 'Método no permitido', 405);
