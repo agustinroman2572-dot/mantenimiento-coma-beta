@@ -962,10 +962,27 @@ function logout() {
   document.body.classList.remove("device-mode-phone");
 }
 
-async function cargarDatosBackend() {
-  try {
-    const res = await fetch("/api/bootstrap");
-    const json = await res.json();
+if (Array.isArray(json.novedades)) {
+  const novedadesNormalizadas = json.novedades.map(n => {
+    const eq = (json.equipos || []).find(e => e.id === n.equipo_id) || {};
+    return {
+      ...n,
+      id: n.id || n.numero || "",
+      numero: n.numero || n.id || "",
+      interno: n.interno || n.interno_manual || eq.interno || "",
+      equipo: n.equipo || eq.equipo || eq.descripcion || "",
+      solicitante: n.solicitante || n.solicitante_nombre || "",
+      sistema: n.sistema || n.sistema_principal || "SIN INFORMACIÓN",
+      criticidad: n.criticidad || n.criticidad_nombre || "SIN INFORMACIÓN",
+      estado: n.estado || "EN REVISIÓN",
+      descripcion: n.descripcion || "",
+      reporta: n.solicitante_nombre || n.solicitante || ""
+    };
+  });
+
+  DATA.novedades = novedadesNormalizadas;
+  store.novedades = novedadesNormalizadas;
+}
 
     if (!json || !json.ok) {
       console.warn("Bootstrap no disponible", json);
