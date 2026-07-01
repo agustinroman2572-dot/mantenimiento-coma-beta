@@ -978,6 +978,7 @@ async function cargarDatosBackend() {
 
     if (Array.isArray(json.novedades)) {
       DATA.novedades = json.novedades;
+      store.novedades = json.novedades;
     }
 
     if (Array.isArray(json.ot_pendientes)) {
