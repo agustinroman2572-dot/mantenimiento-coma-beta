@@ -1,8 +1,11 @@
-import { getSupabaseAdmin, sendOk, sendError, normalizeBody } from "../lib/supabaseAdmin.js";
+import { getSupabaseAdmin, normalizeBody } from "../lib/supabaseAdmin.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return sendError(res, 405, "Método no permitido");
+    return res.status(405).json({
+      ok: false,
+      error: "Método no permitido"
+    });
   }
 
   try {
@@ -14,11 +17,17 @@ export default async function handler(req, res) {
     const observacion_cierre = body.observacion_cierre || null;
 
     if (!ot_id) {
-      return sendError(res, 400, "Falta ot_id");
+      return res.status(400).json({
+        ok: false,
+        error: "Falta ot_id"
+      });
     }
 
     if (!horometro_service) {
-      return sendError(res, 400, "Falta horómetro de service");
+      return res.status(400).json({
+        ok: false,
+        error: "Falta horómetro de service"
+      });
     }
 
     const { data, error } = await supabase.rpc(
@@ -31,14 +40,21 @@ export default async function handler(req, res) {
     );
 
     if (error) {
-      return sendError(res, 500, error.message);
+      return res.status(500).json({
+        ok: false,
+        error: error.message
+      });
     }
 
-    return sendOk(res, {
+    return res.status(200).json({
+      ok: true,
       resultado: data
     });
 
   } catch (err) {
-    return sendError(res, 500, err.message);
+    return res.status(500).json({
+      ok: false,
+      error: err.message
+    });
   }
 }
