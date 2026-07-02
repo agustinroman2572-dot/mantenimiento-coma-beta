@@ -1,50 +1,44 @@
-import { supabaseAdmin } from "../lib/supabaseAdmin.js";
+import { getSupabaseAdmin, sendOk, sendError, normalizeBody } from "../lib/supabaseAdmin.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ ok: false, error: "Método no permitido" });
+    return sendError(res, 405, "Método no permitido");
   }
 
   try {
-    const {
-      ot_id,
-      horometro_service,
-      observacion_cierre
-    } = req.body || {};
+    const supabase = getSupabaseAdmin();
+    const body = normalizeBody(req.body || {});
+
+    const ot_id = body.ot_id;
+    const horometro_service = body.horometro_service;
+    const observacion_cierre = body.observacion_cierre || null;
 
     if (!ot_id) {
-      return res.status(400).json({ ok: false, error: "Falta ot_id" });
+      return sendError(res, 400, "Falta ot_id");
     }
 
     if (!horometro_service) {
-      return res.status(400).json({ ok: false, error: "Falta horómetro de service" });
+      return sendError(res, 400, "Falta horómetro de service");
     }
 
-    const { data, error } = await supabaseAdmin.rpc(
+    const { data, error } = await supabase.rpc(
       "cerrar_ot_y_actualizar_service",
       {
         p_ot_id: ot_id,
         p_horometro_service: Number(horometro_service),
-        p_observacion_cierre: observacion_cierre || null
+        p_observacion_cierre: observacion_cierre
       }
     );
 
     if (error) {
-      return res.status(500).json({
-        ok: false,
-        error: error.message
-      });
+      return sendError(res, 500, error.message);
     }
 
-    return res.status(200).json({
-      ok: true,
+    return sendOk(res, {
       resultado: data
     });
 
   } catch (err) {
-    return res.status(500).json({
-      ok: false,
-      error: err.message
-    });
+    return sendError(res, 500, err.message);
   }
 }
