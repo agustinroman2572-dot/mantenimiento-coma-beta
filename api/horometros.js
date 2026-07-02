@@ -105,8 +105,6 @@ if (Object.keys(updateEquipo).length > 0) {
 
   if (updateError) throw updateError;
 }
-  if (updateError) throw updateError;
-
   return {
     interno,
     equipo_id: equipo.id,
