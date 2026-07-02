@@ -1429,8 +1429,8 @@ const days = (() => {
           <div class="gantt-head-cell-ok">FECHA<br>SERVICE</div>
           <div class="gantt-head-cell-ok">ESTADO</div>
           <div class="gantt-timeline-head-ok">
-           <div class="gantt-weeks-ok">${weeks.map((w,i)=>{const f=new Date(w[0]+"T00:00:00");const mes=f.toLocaleDateString("es-AR",{month:"long",year:"numeric"}).toUpperCase();const semanaMes=Math.floor((f.getDate()-1)/7)+1;return `<div class="gantt-week-ok"><strong>${mes}</strong><span>SEMANA ${semanaMes}</span></div>`;}).join("")}</div>
-<div class="gantt-days-ok">${weeks.map((w,i)=>`<div class="gantt-day-ok">${i+1}</div>`).join("")}</div>
+           <div class="gantt-weeks-ok" style="display:grid;grid-template-columns:repeat(6,minmax(180px,1fr));">${Array.from({length:6},(_,i)=>{const f=new Date(todayISO()+"T00:00:00");f.setMonth(f.getMonth()+i);const mes=f.toLocaleDateString("es-AR",{month:"long",year:"numeric"}).toUpperCase();return `<div class="gantt-week-ok"><strong>${mes}</strong></div>`;}).join("")}</div>
+<div class="gantt-days-ok" style="display:grid;grid-template-columns:repeat(24,minmax(45px,1fr));">${Array.from({length:24},(_,i)=>`<div class="gantt-day-ok">SEM ${i%4+1}</div>`).join("")}</div>
           </div>
         </div>`;
 
