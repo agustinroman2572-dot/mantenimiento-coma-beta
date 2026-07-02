@@ -76,19 +76,35 @@ async function guardarUnHorometro(supabase, body) {
 
   if (insertError) throw insertError;
 
-  const updateEquipo = {
-    horometro_actual: horometro
-  };
+ const { data: ultimoRegistro, error: ultimoError } = await supabase
+  .from("horometros")
+  .select("id, fecha_reporte, horometro, created_at")
+  .eq("equipo_id", equipo.id)
+  .order("fecha_reporte", { ascending: false })
+  .order("created_at", { ascending: false })
+  .limit(1)
+  .maybeSingle();
 
-  if (b.estado_equipo || b.estado) {
-    updateEquipo.estado = clean(b.estado_equipo || b.estado);
-  }
+if (ultimoError) throw ultimoError;
 
+const updateEquipo = {};
+
+if (ultimoRegistro && ultimoRegistro.horometro !== null) {
+  updateEquipo.horometro_actual = Number(ultimoRegistro.horometro);
+}
+
+if (b.estado_equipo || b.estado) {
+  updateEquipo.estado = clean(b.estado_equipo || b.estado);
+}
+
+if (Object.keys(updateEquipo).length > 0) {
   const { error: updateError } = await supabase
-    .from('equipos')
+    .from("equipos")
     .update(updateEquipo)
-    .eq('id', equipo.id);
+    .eq("id", equipo.id);
 
+  if (updateError) throw updateError;
+}
   if (updateError) throw updateError;
 
   return {
