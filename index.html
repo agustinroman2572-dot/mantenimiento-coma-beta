@@ -1955,23 +1955,83 @@ function cerrarOT(id) {
         </div>
         <label>Pendientes<textarea name="pendientes" placeholder="Vacío si no queda pendiente"></textarea></label>
         <label>Foto de cierre obligatoria<input id="fotoCierre" type="file" multiple required></label>
+        <label class="check-item">
+  <input type="checkbox" id="marcarServiceRealizado">
+  <span>Marcar como service realizado</span>
+</label>
+
+<label>Horómetro de service realizado
+  <input id="horometroServiceRealizado" type="number" placeholder="Ej: 6260">
+</label>
         <button class="btn btn-green" type="submit">Guardar y finalizar</button>
       </form>
     </div>`;
-  qs("#closeForm").addEventListener("submit", ev=>{
-    ev.preventDefault();
-    if(qs("#fotoCierre").files.length===0) { alert("La foto de cierre es obligatoria."); return; }
-    const fd = new FormData(ev.target);
-    const sistemasMarcados = qsa("input[name='sistemasAfectados']:checked").map(o=>up(o.value));
-    if(sistemasMarcados.length===0) { alert("Seleccioná al menos un sistema afectado."); return; }
-    const sistemas = sistemasMarcados.join(", ");
-    store.cierres = [{
-      ot:id.replace("NOV","OT"),
-      fecha:new Date().toISOString().slice(0,10),
-      interno:n.interno,
-      tipo:up(fd.get("tipo")),
-      trabajo:`SISTEMAS AFECTADOS: ${sistemas}. TRABAJO: ${up(fd.get("trabajo"))}`,
-      mecanico:up(state.user.nombre)
+  qs("#closeForm").addEventListener("submit", async ev=>{
+  ev.preventDefault();
+
+  if(qs("#fotoCierre").files.length===0) {
+    alert("La foto de cierre es obligatoria.");
+    return;
+  }
+
+  const fd = new FormData(ev.target);
+  const sistemasMarcados = qsa("input[name='sistemasAfectados']:checked").map(op=>up(op.value));
+
+  if(sistemasMarcados.length===0) {
+    alert("Seleccioná al menos un sistema afectado.");
+    return;
+  }
+
+  const marcarService = qs("#marcarServiceRealizado")?.checked;
+  const horometroService = qs("#horometroServiceRealizado")?.value;
+
+  if(marcarService && !horometroService) {
+    alert("Ingresá el horómetro del service realizado.");
+    return;
+  }
+
+  const sistemas = sistemasMarcados.join(", ");
+
+  if(marcarService) {
+    const otId = n.ot_id || n.otId || n.id;
+
+    const res = await fetch("/api/cerrar-service", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ot_id: otId,
+        horometro_service: horometroService,
+        observacion_cierre: `SISTEMAS AFECTADOS: ${sistemas}. TRABAJO: ${up(fd.get("trabajo"))}. MECÁNICO: ${state.user.nombre}`
+      })
+    });
+
+    const json = await res.json();
+
+    if(!json.ok) {
+      alert("No se pudo actualizar el service: " + (json.error || "Error desconocido"));
+      return;
+    }
+  }
+
+  store.cierres = [{
+    ot_id: n.id.replace("NOV","OT"),
+    fecha: new Date().toISOString().slice(0,10),
+    interno: n.interno,
+    tipo: up(fd.get("tipo")),
+    trabajo: `SISTEMAS AFECTADOS: ${sistemas}. TRABAJO: ${up(fd.get("trabajo"))}`,
+    mecanico: up(state.user.nombre)
+  }, ...store.cierres];
+
+  const all = store.novedades;
+  const i = all.findIndex(x=>x.id===id);
+  if(i>=0) all[i].estado = "Finalizada";
+  store.novedades = all;
+
+  await cargarDatosBackend();
+
+  alert(marcarService ? "OT cerrada y service actualizado correctamente." : "OT cerrada correctamente.");
+  navigate("historial");
+});
     }, ...store.cierres];
     const all = store.novedades;
     const i = all.findIndex(x=>x.id===id);
