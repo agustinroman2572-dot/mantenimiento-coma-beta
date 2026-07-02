@@ -1418,7 +1418,7 @@ const days = (() => {
   const render = () => {
     try {
       const rows = filterRows();
-      const weeks = Array.from({length:6},(_,i)=>days.slice(i*7,(i+1)*7));
+      const weeks = Array.from({length:Math.ceil(days.length/7)},(_,i)=>days.slice(i*7,(i+1)*7).filter(Boolean));
       const header = `
         <div class="gantt-header-ok">
           <div class="gantt-head-cell-ok">INTERNO</div>
@@ -1429,8 +1429,8 @@ const days = (() => {
           <div class="gantt-head-cell-ok">FECHA<br>SERVICE</div>
           <div class="gantt-head-cell-ok">ESTADO</div>
           <div class="gantt-timeline-head-ok">
-            <div class="gantt-weeks-ok">${weeks.map((w,i)=>`<div class="gantt-week-ok"><strong>${weekNames[i]}</strong><span>${formatGanttDateSafe(w[0])} – ${formatGanttDateSafe(w[w.length-1])}</span></div>`).join("")}</div>
-            <div class="gantt-days-ok">${days.map((d,i)=>`<div class="gantt-day-ok ${(i%7===5||i%7===6)?'weekend':''}">${dayLetters[i%7]}</div>`).join("")}</div>
+           <div class="gantt-weeks-ok">${weeks.map((w,i)=>{const f=new Date(w[0]+"T00:00:00");const mes=f.toLocaleDateString("es-AR",{month:"long",year:"numeric"}).toUpperCase();const semanaMes=Math.floor((f.getDate()-1)/7)+1;return `<div class="gantt-week-ok"><strong>${mes}</strong><span>SEMANA ${semanaMes}</span></div>`;}).join("")}</div>
+<div class="gantt-days-ok">${weeks.map((w,i)=>`<div class="gantt-day-ok">${i+1}</div>`).join("")}</div>
           </div>
         </div>`;
 
