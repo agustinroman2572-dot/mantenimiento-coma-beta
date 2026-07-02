@@ -1772,12 +1772,13 @@ function reporteSemanal() {
     const inputs = tr.querySelectorAll("input");
     const select = tr.querySelector("select");
 
-    return {
-      interno: inputs[0]?.value || "",
-      horometro: inputs[1]?.value || "",
-      obra: select?.value || "",
-      observacion: inputs[2]?.value || ""
-    };
+   return {
+  interno: inputs[0]?.value || "",
+  fecha_reporte: inputs[1]?.value || todayISO(),
+  horometro: inputs[2]?.value || "",
+  obra: select?.value || "",
+  observacion: inputs[3]?.value || ""
+};
   }).filter(r => r.interno && r.horometro);
 
   if (!registros.length) {
@@ -1826,9 +1827,37 @@ function reporteSemanal() {
 function agregarFilaHorometro() {
   const tb = qs("#weeklyRows");
   if(!tb) return;
-  tb.insertAdjacentHTML("beforeend", `<tr><td><input list="listaInternosSemanal" placeholder="Interno" required><datalist id="listaInternosSemanal">${DATA.equipos.map(e=>`<option value="${esc(e.interno)}">Interno ${esc(e.interno)} - ${esc(e.marca)} ${esc(e.modelo)}</option>`).join("")}</datalist></td><td><input type="number" min="0" placeholder="Horas" required></td><td><select required>${DATA.obras.map(o=>`<option>${esc(o)}</option>`).join("")}</select></td><td><input placeholder="Observación"></td></tr>`);
-}
 
+  const hoy = todayISO();
+
+  tb.insertAdjacentHTML("beforeend", `
+    <tr>
+      <td>
+        <input list="listaInternosSemanal" placeholder="Interno" required>
+        <datalist id="listaInternosSemanal">
+          ${DATA.equipos.map(e=>`<option value="${esc(e.interno)}">Interno ${esc(e.interno)} - ${esc(e.marca)} ${esc(e.modelo)}</option>`).join("")}
+        </datalist>
+      </td>
+      <td>
+        <input type="date" value="${hoy}" required>
+      </td>
+      <td>
+        <input type="number" placeholder="Horómetro" required>
+      </td>
+      <td>
+        <select>
+          <option value="">Sin obra</option>
+          <option value="MSU">MSU</option>
+          <option value="RIO TINTO">RIO TINTO</option>
+          <option value="MORENO">MORENO</option>
+        </select>
+      </td>
+      <td>
+        <input placeholder="Observación">
+      </td>
+    </tr>
+  `);
+}
 
 function misNovedades() {
   const rowsBase = store.novedades.filter(n=>n.reporta===state.user.rol || state.user.panel==="obra");
