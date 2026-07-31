@@ -1018,6 +1018,192 @@ aside .panel,
     border-radius:16px !important;
   }
 }
+  /* =========================================================
+   VISUAL V14 - PASO 2
+   Dashboard, tarjetas, botones superiores y tablas
+   ========================================================= */
+
+/* Pantalla principal más aireada */
+#screen{
+  padding:28px 30px !important;
+}
+
+/* Título de página */
+#screen h1,
+#screen h2{
+  font-size:34px !important;
+  line-height:1.1 !important;
+  font-weight:950 !important;
+  color:#132238 !important;
+  margin-bottom:8px !important;
+}
+
+/* Subtítulo debajo del título */
+#screen > p,
+#screen .muted{
+  font-size:15px !important;
+  color:#66758a !important;
+}
+
+/* Botones de acción superiores */
+#screen .btn,
+#screen button{
+  min-height:44px !important;
+  padding:11px 18px !important;
+  border-radius:13px !important;
+  font-weight:900 !important;
+}
+
+/* Botón verde principal */
+#screen .btn-green,
+#screen button.btn-green{
+  background:#07964b !important;
+  color:white !important;
+  border:1px solid #07964b !important;
+  box-shadow:0 10px 22px rgba(7,150,75,.20) !important;
+}
+
+/* Botón amarillo */
+#screen .btn-yellow,
+#screen button.btn-yellow,
+button[style*="yellow"],
+button[style*="f4b"]{
+  background:#f4b41a !important;
+  color:#1e2600 !important;
+  border:1px solid #f4b41a !important;
+  box-shadow:0 10px 22px rgba(244,180,26,.18) !important;
+}
+
+/* Tarjetas generales del dashboard */
+.chart-card,
+.panel,
+.kpi,
+.card{
+  background:#ffffff !important;
+  border:1px solid #dfe8ed !important;
+  border-radius:18px !important;
+  box-shadow:0 12px 30px rgba(15,35,55,.08) !important;
+}
+
+/* Tarjetas pequeñas de indicadores */
+.chart-card{
+  min-height:92px !important;
+  padding:22px 22px !important;
+  position:relative !important;
+  overflow:hidden !important;
+}
+
+/* Título chico de cada tarjeta */
+.chart-card h4,
+.chart-card .muted,
+.chart-card span{
+  font-size:12px !important;
+  font-weight:950 !important;
+  letter-spacing:.5px !important;
+  text-transform:uppercase !important;
+  color:#304156 !important;
+}
+
+/* Número grande */
+.chart-card strong,
+.chart-card b,
+.chart-card .big{
+  font-size:34px !important;
+  font-weight:950 !important;
+  line-height:1 !important;
+}
+
+/* Efecto suave en tarjetas */
+.chart-card:hover,
+.panel:hover{
+  transform:translateY(-1px);
+  transition:.18s ease;
+  box-shadow:0 16px 34px rgba(15,35,55,.11) !important;
+}
+
+/* Panel fuente de datos */
+.panel-title h3{
+  font-size:20px !important;
+  font-weight:950 !important;
+  color:#102236 !important;
+}
+
+/* Cajas internas tipo fuente de datos */
+.panel [style*="border"],
+.panel .hint,
+.panel .source-box{
+  border-radius:15px !important;
+}
+
+/* Tablas más modernas */
+.table-wrap{
+  border-radius:18px !important;
+  border:1px solid #dfe8ed !important;
+  box-shadow:0 12px 30px rgba(15,35,55,.07) !important;
+  background:#ffffff !important;
+}
+
+.table-wrap table{
+  font-size:14px !important;
+}
+
+.table-wrap thead th{
+  background:#f4f8fa !important;
+  color:#22354d !important;
+  padding:14px 12px !important;
+  font-size:12px !important;
+  font-weight:950 !important;
+  border-bottom:1px solid #dfe8ed !important;
+}
+
+.table-wrap tbody td{
+  padding:14px 12px !important;
+  color:#14243a !important;
+}
+
+.table-wrap tbody tr:hover{
+  background:#f8fcfa !important;
+}
+
+/* Badges de estado más profesionales */
+.pill,
+.badge,
+.tag{
+  border-radius:999px !important;
+  padding:7px 13px !important;
+  font-size:12px !important;
+  font-weight:950 !important;
+}
+
+/* Ajuste del menú lateral */
+nav button,
+aside button,
+button[onclick*="navigate"]{
+  min-height:48px !important;
+  font-size:16px !important;
+  font-weight:900 !important;
+}
+
+/* Activo del menú más parecido al mockup */
+nav button.active,
+aside button.active,
+button.active{
+  background:rgba(255,255,255,.16) !important;
+  border-color:rgba(255,255,255,.25) !important;
+}
+
+/* Header usuario */
+header .btn,
+header button{
+  border-radius:999px !important;
+}
+
+/* Mayor separación entre secciones */
+#screen > .panel,
+#screen > .table-wrap,
+#screen > div{
+  margin-bottom:20px !important;
+}
 </style>
 </head>
 <body>
