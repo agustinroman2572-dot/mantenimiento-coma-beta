@@ -747,7 +747,277 @@ input:not(#passwordInput), textarea, select {
   font-weight:800;
   margin:10px 0 14px;
 }
+/* =========================================================
+   VISUAL V14 - COMA MANTENIMIENTO
+   Paso 1: base visual global sin tocar funciones
+   ========================================================= */
 
+:root{
+  --coma-green:#006b35;
+  --coma-green-dark:#003d25;
+  --coma-green-soft:#e8f7ee;
+  --coma-green-mid:#0f8a49;
+
+  --coma-bg:#f4f7f9;
+  --coma-card:#ffffff;
+  --coma-border:#dce5ea;
+  --coma-text:#132238;
+  --coma-muted:#617084;
+
+  --coma-red:#e53935;
+  --coma-red-soft:#fdeaea;
+  --coma-yellow:#f4b41a;
+  --coma-yellow-soft:#fff4d6;
+  --coma-blue:#2f80ed;
+  --coma-blue-soft:#eaf2ff;
+  --coma-gray:#eef2f5;
+
+  --coma-radius:18px;
+  --coma-shadow:0 12px 28px rgba(15,35,55,.08);
+}
+
+/* Fondo general */
+body{
+  background:var(--coma-bg) !important;
+  color:var(--coma-text) !important;
+}
+
+/* Contenedor principal */
+main,
+#screen{
+  background:var(--coma-bg) !important;
+}
+
+/* Header superior */
+header,
+.topbar,
+.app-header{
+  background:#ffffff !important;
+  border-bottom:1px solid var(--coma-border) !important;
+  box-shadow:0 4px 14px rgba(20,40,60,.04) !important;
+}
+
+/* Menú lateral - intenta cubrir las clases actuales sin tocar estructura */
+aside,
+.sidebar,
+.side,
+.app-sidebar,
+.leftbar{
+  background:linear-gradient(180deg,#003d25 0%,#06462d 48%,#00331f 100%) !important;
+  color:#ffffff !important;
+  border-right:0 !important;
+}
+
+/* Botones de navegación del menú */
+aside button,
+.sidebar button,
+.side button,
+.app-sidebar button,
+.leftbar button,
+button[onclick*="navigate"]{
+  border-radius:14px !important;
+  border:1px solid rgba(255,255,255,.13) !important;
+  transition:.18s ease !important;
+}
+
+/* Botón activo / hover de navegación */
+aside button:hover,
+.sidebar button:hover,
+.side button:hover,
+.app-sidebar button:hover,
+.leftbar button:hover{
+  background:rgba(255,255,255,.13) !important;
+  transform:translateX(2px);
+}
+
+/* Paneles y tarjetas */
+.panel,
+.card,
+.kpi,
+.stat-card,
+.metric-card,
+.gantt-card,
+.table-wrap,
+.login-card,
+.success-screen{
+  background:var(--coma-card) !important;
+  border:1px solid var(--coma-border) !important;
+  border-radius:var(--coma-radius) !important;
+  box-shadow:var(--coma-shadow) !important;
+}
+
+/* Títulos principales */
+h1,
+h2,
+.page-title{
+  color:var(--coma-text) !important;
+  letter-spacing:-.4px;
+}
+
+h1{
+  font-size:34px !important;
+  font-weight:900 !important;
+}
+
+h2{
+  font-weight:850 !important;
+}
+
+/* Subtítulos / textos secundarios */
+.muted,
+small,
+.subtitle,
+.page-subtitle{
+  color:var(--coma-muted) !important;
+}
+
+/* Botones verdes principales */
+.btn-green,
+.btn.btn-green,
+button.btn-green,
+button[class*="green"]{
+  background:var(--coma-green-mid) !important;
+  border-color:var(--coma-green-mid) !important;
+  color:#ffffff !important;
+  border-radius:13px !important;
+  font-weight:800 !important;
+  box-shadow:0 8px 18px rgba(0,107,53,.18) !important;
+}
+
+.btn-green:hover,
+.btn.btn-green:hover,
+button.btn-green:hover,
+button[class*="green"]:hover{
+  background:var(--coma-green) !important;
+  transform:translateY(-1px);
+}
+
+/* Botones secundarios */
+.btn,
+button{
+  border-radius:13px !important;
+}
+
+/* Inputs, selects y textareas */
+input,
+select,
+textarea{
+  border:1px solid var(--coma-border) !important;
+  border-radius:13px !important;
+  background:#ffffff !important;
+  color:var(--coma-text) !important;
+  outline:none !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+  border-color:var(--coma-green-mid) !important;
+  box-shadow:0 0 0 3px rgba(15,138,73,.12) !important;
+}
+
+/* Tablas */
+table{
+  border-collapse:separate !important;
+  border-spacing:0 !important;
+  width:100% !important;
+}
+
+thead th{
+  background:#f7fafb !important;
+  color:#24364d !important;
+  font-weight:900 !important;
+  text-transform:uppercase;
+  font-size:12px !important;
+  border-bottom:1px solid var(--coma-border) !important;
+}
+
+tbody td{
+  border-bottom:1px solid #e8eef2 !important;
+}
+
+tbody tr:hover{
+  background:#f9fcfa !important;
+}
+
+/* Badges / estados */
+.badge,
+.pill,
+.tag,
+.estado,
+.status{
+  border-radius:999px !important;
+  font-weight:900 !important;
+  padding:6px 12px !important;
+}
+
+/* Estados por texto */
+.badge:has-text("VENCIDO"),
+.pill:has-text("VENCIDO"){
+  background:var(--coma-red-soft) !important;
+  color:var(--coma-red) !important;
+}
+
+/* Regla de carga verde */
+.uppercase-rule{
+  background:#f2fff7 !important;
+  border:1px solid #bfe8cf !important;
+  color:#006b35 !important;
+  border-radius:14px !important;
+  font-weight:900 !important;
+}
+
+/* Tarjetas de indicadores si existen */
+.kpi strong,
+.stat-card strong,
+.metric-card strong{
+  font-size:32px !important;
+  font-weight:950 !important;
+}
+
+/* Scroll horizontal más prolijo */
+.table-wrap{
+  overflow:auto !important;
+}
+
+.table-wrap::-webkit-scrollbar{
+  height:10px;
+}
+
+.table-wrap::-webkit-scrollbar-track{
+  background:#edf2f5;
+  border-radius:999px;
+}
+
+.table-wrap::-webkit-scrollbar-thumb{
+  background:#aebbc5;
+  border-radius:999px;
+}
+
+/* Caja permiso inferior izquierda */
+aside .panel,
+.sidebar .panel,
+.side .panel,
+.app-sidebar .panel,
+.leftbar .panel{
+  background:rgba(255,255,255,.94) !important;
+  color:var(--coma-text) !important;
+}
+
+/* Ajuste mobile básico */
+@media(max-width:900px){
+  h1{
+    font-size:26px !important;
+  }
+
+  .panel,
+  .card,
+  .kpi,
+  .stat-card,
+  .metric-card{
+    border-radius:16px !important;
+  }
+}
 </style>
 </head>
 <body>
