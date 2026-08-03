@@ -1555,45 +1555,133 @@ function dashboard() {
   };
   const fs = DATA.equipos.filter(e=>(e.estado||"").includes("Fuera")).length;
   const obras = [...new Set(nov.map(n=>n.ubicacion).filter(Boolean))].sort();
-  qs("#screen").innerHTML = `
-    ${page("Inicio / Dashboard operativo", "Panel principal con OT, próximos services y seguimiento por obra.",
-      `<button class="btn btn-green" onclick="navigate('reporte')">Nueva novedad</button><button class="btn btn-amber" onclick="navigate('novedades')">Ver OT pendientes</button><button class="btn btn-ghost" onclick="navigate('crearOT')">Crear OT directa</button>`)}
-    <div class="grid-kpi">
-      <div class="kpi red"><small>OT pendientes</small><strong>${k.pendientes}</strong></div>
-      <div class="kpi blue"><small>OT asignadas</small><strong>${k.asignadas}</strong></div>
-      <div class="kpi blue"><small>OT en curso</small><strong>${k.enCurso}</strong></div>
-      <div class="kpi green"><small>OT finalizadas</small><strong>${k.finalizadas}</strong></div>
-      <div class="kpi red"><small>Equipos F/S</small><strong>${fs}</strong></div>
-    </div>
-    <div class="grid-kpi">
-      <div class="kpi red"><small>Services vencidos</small><strong>${DATA.equipos.filter(e=>up(e.serviceEstado)==="VENCIDO").length}</strong></div>
-      <div class="kpi amber"><small>A programar</small><strong>${DATA.equipos.filter(e=>up(e.serviceEstado)==="PROGRAMAR").length}</strong></div>
-      <div class="kpi amber"><small>Próx. services en fecha</small><strong>${proximosFecha.length}</strong></div>
-      <div class="kpi green"><small>Services normales</small><strong>${DATA.equipos.filter(e=>up(e.serviceEstado)==="NORMAL").length}</strong></div>
-      <div class="kpi blue"><small>Total equipos</small><strong>${DATA.equipos.length}</strong></div>
-    </div>
-    <div class="panel" style="border-color:#d9e2ea;background:#ffffff">
-      <div class="panel-title"><h3>Fuente de datos</h3><span>Excel Sistema.xlsx actualizado</span></div>
-      <div class="form-grid-3">
-        <div class="hint"><strong>Equipos en nómina</strong><br>${DATA.metadatosExcel?.equiposNomina || DATA.equipos.length}</div>
-        <div class="hint"><strong>Historial OT</strong><br>${DATA.metadatosExcel?.historialRegistros || 0} registros</div>
-        <div class="hint"><strong>Obras catálogo</strong><br>${DATA.metadatosExcel?.obrasCatalogo || DATA.obras.length}</div>
+   qs("#screen").innerHTML = `
+    ${page(
+      "Inicio / Dashboard operativo",
+      "Panel principal de mantenimiento, services, OT y estado general de la flota.",
+      `<button class="btn btn-green" onclick="navigate('reporte')">Nueva carga</button>
+       <button class="btn btn-amber" onclick="navigate('gantt')">Ver calendario</button>
+       <button class="btn btn-ghost" onclick="navigate('crearot')">Crear OT directa</button>`
+    )}
+
+    <div style="display:grid;grid-template-columns:repeat(5,minmax(150px,1fr));gap:16px;margin-bottom:20px;">
+      <div class="panel" style="padding:22px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="width:56px;height:56px;border-radius:50%;background:#e8f7ee;display:flex;align-items:center;justify-content:center;font-size:28px;">🏗️</div>
+          <div>
+            <div style="font-size:12px;font-weight:900;color:#617084;text-transform:uppercase;">Total equipos</div>
+            <div style="font-size:36px;font-weight:950;color:#006b35;line-height:1;">${DATA.equipos.length}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="padding:22px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="width:56px;height:56px;border-radius:50%;background:#e8f7ee;display:flex;align-items:center;justify-content:center;font-size:28px;">✅</div>
+          <div>
+            <div style="font-size:12px;font-weight:900;color:#617084;text-transform:uppercase;">Services normales</div>
+            <div style="font-size:36px;font-weight:950;color:#0f8a49;line-height:1;">${DATA.equipos.filter(e=>up(e.serviceEstado)==="NORMAL").length}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="padding:22px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="width:56px;height:56px;border-radius:50%;background:#fff4d6;display:flex;align-items:center;justify-content:center;font-size:28px;">📅</div>
+          <div>
+            <div style="font-size:12px;font-weight:900;color:#617084;text-transform:uppercase;">A programar</div>
+            <div style="font-size:36px;font-weight:950;color:#d99000;line-height:1;">${DATA.equipos.filter(e=>up(e.serviceEstado)==="PROGRAMAR").length}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="padding:22px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="width:56px;height:56px;border-radius:50%;background:#fdeaea;display:flex;align-items:center;justify-content:center;font-size:28px;">⚠️</div>
+          <div>
+            <div style="font-size:12px;font-weight:900;color:#617084;text-transform:uppercase;">Services vencidos</div>
+            <div style="font-size:36px;font-weight:950;color:#e53935;line-height:1;">${DATA.equipos.filter(e=>up(e.serviceEstado)==="VENCIDO" || up(e.serviceEstado)==="VENCIDO CRITICO").length}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="padding:22px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="width:56px;height:56px;border-radius:50%;background:#eef2f5;display:flex;align-items:center;justify-content:center;font-size:28px;">❔</div>
+          <div>
+            <div style="font-size:12px;font-weight:900;color:#617084;text-transform:uppercase;">Sin información</div>
+            <div style="font-size:36px;font-weight:950;color:#596777;line-height:1;">${DATA.equipos.filter(e=>up(e.serviceEstado)==="SIN INFORMACION").length}</div>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="panel">
-      <div class="panel-title"><h3>Próximos services por fecha estimada</h3><span>Estimación visual para programación</span></div>
+
+    <div style="display:grid;grid-template-columns:1.2fr .8fr;gap:18px;margin-bottom:20px;">
+      <div class="panel" style="padding:22px;">
+        <div class="panel-title">
+          <h3>Resumen operativo</h3>
+          <span>Estado actual del sistema</span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+          <div style="border:1px dashed #dce5ea;border-radius:15px;padding:16px;background:#fbfdfe;">
+            <strong style="display:block;font-size:24px;color:#0f8a49;">${k.finalizadas}</strong>
+            <span class="muted">OT finalizadas</span>
+          </div>
+          <div style="border:1px dashed #dce5ea;border-radius:15px;padding:16px;background:#fbfdfe;">
+            <strong style="display:block;font-size:24px;color:#1f64b5;">${k.enCurso}</strong>
+            <span class="muted">OT en curso</span>
+          </div>
+          <div style="border:1px dashed #dce5ea;border-radius:15px;padding:16px;background:#fbfdfe;">
+            <strong style="display:block;font-size:24px;color:#d99000;">${k.pendientes}</strong>
+            <span class="muted">OT pendientes</span>
+          </div>
+          <div style="border:1px dashed #dce5ea;border-radius:15px;padding:16px;background:#fbfdfe;">
+            <strong style="display:block;font-size:24px;color:#e53935;">${fs}</strong>
+            <span class="muted">Equipos fuera de servicio</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="padding:22px;">
+        <div class="panel-title">
+          <h3>Fuente de datos</h3>
+          <span>Excel Sistema.xlsx actualizado</span>
+        </div>
+
+        <div style="display:grid;gap:12px;">
+          <div style="border:1px dashed #dce5ea;border-radius:15px;padding:14px;background:#fbfdfe;">
+            <strong>Equipos en nómina</strong><br>
+            <span class="muted">${DATA.metadatosExcel?.equiposNomina || DATA.equipos.length}</span>
+          </div>
+          <div style="border:1px dashed #dce5ea;border-radius:15px;padding:14px;background:#fbfdfe;">
+            <strong>Historial OT</strong><br>
+            <span class="muted">${DATA.metadatosExcel?.historialRegistros || 0} registros</span>
+          </div>
+          <div style="border:1px dashed #dce5ea;border-radius:15px;padding:14px;background:#fbfdfe;">
+            <strong>Obras catálogo</strong><br>
+            <span class="muted">${DATA.metadatosExcel?.obrasCatalogo || DATA.obras.length}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="padding:22px;">
+      <div class="panel-title">
+        <h3>Próximos services por fecha estimada</h3>
+        <span>Estimación visual para programación</span>
+      </div>
       ${serviceFechaTable(proximosFecha)}
     </div>
-    <div class="panel">
-      <div class="panel-title"><h3>OT pendientes / solicitadas</h3><span>Filtro rápido por obra</span></div>
-      <div class="filterbar"><select id="dashObra"><option value="">Todas las obras</option>${obras.map(o=>`<option>${o}</option>`).join("")}</select></div>
+
+    <div style="display:none;">
+      <select id="dashObra">
+        <option value="">Todas las obras</option>
+        ${obras.map(o=>`<option>${o}</option>`).join("")}
+      </select>
       <div id="dashOT"></div>
     </div>
-    <div class="chart-grid">
-      <div class="chart-card"><h4>OT por estado</h4>${bar("Pendiente", k.pendientes, 12, "#d92d20")}${bar("En revisión", k.revision, 12, "#f7b733")}${bar("Asignada", k.asignadas, 12, "#1e63b6")}${bar("Finalizadas", k.finalizadas, 18, "#09984a")}</div>
-      <div class="chart-card"><h4>Sistemas más afectados</h4>${bar("Hidráulico", countBy(nov,"sistema","Hidráulico"), 8, "#1e63b6")}${bar("Eléctrico", countBy(nov,"sistema","Eléctrico"), 8, "#1e63b6")}${bar("Mecánico", countBy(nov,"sistema","Mecánico"), 8, "#1e63b6")}</div>
-      <div class="chart-card"><h4>Regla de service</h4><div class="hint"><strong>Intervalo fijo:</strong> cada 250 hs.<br><strong>Vencido:</strong> 0 hs o menos.<br><strong>Programar:</strong> faltan 60 hs o menos.<br><strong>Normal:</strong> más de 60 hs.</div></div>
-    </div>`;
+  `;
   const paintDashOT = () => {
     const obra = qs("#dashObra").value;
     const rows = store.novedades.filter(n => (!obra || n.ubicacion===obra) && !isState(n.estado,"Finalizada"));
